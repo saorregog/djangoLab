@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'user',
+    'base',
+    'posts',
 ]
 
 MIDDLEWARE = [
@@ -52,7 +55,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'avanzatech_blog.urls'
 
-AUTH_USER_MODEL = 'user.CustomUser'
+AUTH_USER_MODEL = 'user.CustomUsers'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
@@ -115,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 

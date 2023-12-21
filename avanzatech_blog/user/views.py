@@ -1,25 +1,131 @@
-# Create your views here.
-from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.hashers import make_password
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            # Redirect to a success page.
-            return redirect('success_page')
+from rest_framework import generics, status
+from rest_framework.response import Response
+
+from .models import CustomUsers
+from .serializers import UsersModelSerializer
+from base.permissions import IsSuperuser
+from base.functions import create_update_validations
+
+
+class UsersListAPIView(generics.ListAPIView):
+    queryset = CustomUsers.objects.all()
+    serializer_class = UsersModelSerializer
+    permission_classes = [IsSuperuser]
+
+
+class UsersCreateAPIView(generics.CreateAPIView):
+    serializer_class = UsersModelSerializer
+    permission_classes = [IsSuperuser]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        error = {'errors': []}
+
+        is_active = serializer.validated_data.get('is_active')
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+        role = serializer.validated_data.get('role')
+        team = serializer.validated_data.get('team')
+        first_name = serializer.validated_data.get('first_name')
+
+        if not is_active:
+            is_active = True
+
+        if not email:
+            error['errors'].append('Email address field may not be blank.')
+
+        if not password:
+            error['errors'].append('Password field may not be blank.')
+
+        if role == 'blogger' and not team:
+            error['errors'].append('Bloggers must belong to one team.')
+
+        if not first_name:
+            first_name = None
+
+        if error['errors']:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = BaseUserManager.normalize_email(email)
+        password = make_password(password)
+
+        serializer.save(is_active=is_active, email=email, password=password, first_name=first_name)
+
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class UsersUpdateAPIView(generics.UpdateAPIView):
+    queryset = CustomUsers.objects.all()
+    serializer_class = UsersModelSerializer
+    permission_classes = [IsSuperuser]
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        error = {'errors': []}
+
+        is_active = serializer.validated_data.get('is_active')
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+        instance_role = serializer.instance.role
+        validated_data_role = serializer.validated_data.get('role')
+        team = serializer.validated_data.get('team')
+        first_name = serializer.validated_data.get('first_name')
+
+        if not is_active:
+            is_active = True
+        
+        if email:
+            email = BaseUserManager.normalize_email(email)
         else:
-            # Return an 'invalid login' error message.
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
-    else:
-        return render(request, 'login.html')
+            email = serializer.instance.email
+        
+        if password:
+            password = make_password(password)
+        else:
+            password = serializer.instance.password
+
+        if instance_role == validated_data_role:
+            role = serializer.instance.role
+            team = serializer.instance.team
+        elif instance_role == 'blogger' and validated_data_role == 'admin':
+            role = validated_data_role
+            team = ''
+        elif instance_role == 'admin' and validated_data_role == 'blogger':
+            role = validated_data_role
+        
+        if role == 'blogger' and not team:
+            error['errors'].append('Bloggers must belong to one team.')
+        
+        if not first_name:
+            first_name = serializer.instance.first_name
+        
+        if error['errors']:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save(is_active=is_active, email=email, password=password, role=role, team=team, first_name=first_name)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
 
-def logout_view(request):
-    logout(request)
-    # Redirect to a login page, home page, or any other page
-    return redirect('login_page')
+class UsersDeleteAPIView(generics.DestroyAPIView):
+    queryset = CustomUsers.objects.all()
+    serializer_class = UsersModelSerializer
+    permission_classes = [IsSuperuser]
 
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()

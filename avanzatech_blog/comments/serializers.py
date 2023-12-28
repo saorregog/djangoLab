@@ -12,13 +12,6 @@ class CommentModelSerializer(serializers.ModelSerializer):
         )
 
 
-class DeleteCommentModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Comments
-        fields = ()
-
-
 class ListCommentsModelSerializer(serializers.ModelSerializer):
 
     class Meta:

@@ -3,18 +3,6 @@ from rest_framework import serializers
 from .models import Posts
 
 
-class PostsCreateUpdateModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Posts
-        fields = (
-            'title',
-            'content',
-            'read_permission',
-            'edit_permission'
-        )
-
-
 class PostsListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -22,6 +10,18 @@ class PostsListModelSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'author',
+            'title',
+            'content',
+            'read_permission',
+            'edit_permission'
+        )
+
+
+class PostsCreateUpdateModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Posts
+        fields = (
             'title',
             'content',
             'read_permission',

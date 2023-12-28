@@ -13,5 +13,5 @@ urlpatterns = [
     path('comment/<int:pk>/', views.PostsCommentAPIView.as_view(), name='posts-comment'),
     path('comment/delete/<int:pk>/', views.PostsDeleteCommentAPIView.as_view(), name='posts-delete_comment'),
     path('list_comments/<int:pk>/', views.PostsListCommentsAPIView.as_view(), name='posts-list_comments'),
-    # path('delete/<int:pk>/', views.PostsDeleteAPIView.as_view(), name='posts-delete'),
+    path('delete/<int:pk>/', views.PostsDeleteAPIView.as_view(), name='posts-delete'),
 ]

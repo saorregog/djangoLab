@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from base.query_set import BasePostsQuerySet
 from .serializers import PostsCreateUpdateModelSerializer, PostsListModelSerializer, PostsRetrieveModelSerializer
 from likes.serializers import LikeModelSerializer, ListLikesModelSerializer
-from comments.serializers import CommentModelSerializer, DeleteCommentModelSerializer, ListCommentsModelSerializer
+from comments.serializers import CommentModelSerializer, ListCommentsModelSerializer
 from base.paginations import ListPostsCommentsPagination, ListLikesPagination
 from likes.models import Likes
 from comments.models import Comments
@@ -147,7 +147,6 @@ class PostsCommentAPIView(BasePostsQuerySet, generics.CreateAPIView):
     
 
 class PostsDeleteCommentAPIView(BasePostsQuerySet, generics.DestroyAPIView):
-    serializer_class = DeleteCommentModelSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):
@@ -190,11 +189,9 @@ class PostsListCommentsAPIView(BasePostsQuerySet, generics.ListAPIView):
         return Response(serializer.data)
     
 
-# class PostsDeleteAPIView(generics.DestroyAPIView):
-#     queryset = CustomUsers.objects.all()
-#     serializer_class = UsersModelSerializer
-#     permission_classes = [IsSuperuser]
+class PostsDeleteAPIView(BasePostsQuerySet, generics.DestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-#     def perform_destroy(self, instance):
-#         instance.is_active = False
-#         instance.save()
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()

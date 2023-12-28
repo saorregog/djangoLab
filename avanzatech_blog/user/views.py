@@ -66,6 +66,9 @@ class UsersUpdateAPIView(generics.UpdateAPIView):
     serializer_class = UsersModelSerializer
     permission_classes = [IsSuperuser]
 
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -78,7 +81,7 @@ class UsersUpdateAPIView(generics.UpdateAPIView):
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
         instance_role = serializer.instance.role
-        validated_data_role = serializer.validated_data.get('role')
+        role = serializer.validated_data.get('role')
         team = serializer.validated_data.get('team')
         first_name = serializer.validated_data.get('first_name')
 
@@ -95,15 +98,9 @@ class UsersUpdateAPIView(generics.UpdateAPIView):
         else:
             password = serializer.instance.password
 
-        if instance_role == validated_data_role:
-            role = serializer.instance.role
+        if role == instance_role and not team:
             team = serializer.instance.team
-        elif instance_role == 'blogger' and validated_data_role == 'admin':
-            role = validated_data_role
-            team = ''
-        elif instance_role == 'admin' and validated_data_role == 'blogger':
-            role = validated_data_role
-        
+
         if role == 'blogger' and not team:
             error['errors'].append('Bloggers must belong to one team.')
         

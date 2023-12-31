@@ -1,22 +1,34 @@
+# DJANGO IMPORTS
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.hashers import make_password
 
+# DJANGO REST FRAMEWORK IMPORTS
 from rest_framework import generics, status
 from rest_framework.response import Response
 
+# MODELS
 from .models import CustomUsers
+
+# SERIALIZERS
 from .serializers import UsersModelSerializer
+
+# PERMISSIONS
 from base.permissions import IsSuperuser
-from base.functions import create_update_validations
 
 
 class UsersListAPIView(generics.ListAPIView):
+    '''
+    It shows all the users on the blogging platform. Only accessible for SUPERUSER
+    '''
     queryset = CustomUsers.objects.all()
     serializer_class = UsersModelSerializer
     permission_classes = [IsSuperuser]
 
 
 class UsersCreateAPIView(generics.CreateAPIView):
+    '''
+    It creates a new user on the blogging platform with configurable role and team fields. Only accessible for SUPERUSER
+    '''
     serializer_class = UsersModelSerializer
     permission_classes = [IsSuperuser]
 
@@ -62,6 +74,9 @@ class UsersCreateAPIView(generics.CreateAPIView):
 
 
 class UsersUpdateAPIView(generics.UpdateAPIView):
+    '''
+    It edits the specified user (path param) on the blogging platform. Only accessible for SUPERUSER
+    '''
     queryset = CustomUsers.objects.all()
     serializer_class = UsersModelSerializer
     permission_classes = [IsSuperuser]
@@ -119,6 +134,9 @@ class UsersUpdateAPIView(generics.UpdateAPIView):
 
 
 class UsersDeleteAPIView(generics.DestroyAPIView):
+    '''
+    It deletes (soft delete) the specified user (path param) on the blogging platform. Only accessible for SUPERUSER
+    '''
     queryset = CustomUsers.objects.all()
     serializer_class = UsersModelSerializer
     permission_classes = [IsSuperuser]

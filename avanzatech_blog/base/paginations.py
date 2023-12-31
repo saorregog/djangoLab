@@ -1,5 +1,7 @@
+# PYTHON IMPORTS
 from collections import OrderedDict
 
+# DJANGO REST FRAMEWORK IMPORTS
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 

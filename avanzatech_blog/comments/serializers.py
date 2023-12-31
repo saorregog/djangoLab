@@ -1,5 +1,7 @@
+# DJANGO REST FRAMEWORK IMPORTS
 from rest_framework import serializers
 
+# MODELS
 from .models import Comments
 
 
@@ -22,3 +24,10 @@ class ListCommentsModelSerializer(serializers.ModelSerializer):
             'post',
             'content',
         )
+
+
+class DeleteCommentModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comments
+        fields = ()

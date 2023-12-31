@@ -1,7 +1,8 @@
+# DJANGO IMPORTS
 from django.db.models import Q
 
+# MODELS
 from posts.models import Posts
-from likes.models import Likes
 
 
 class BasePostsQuerySet():

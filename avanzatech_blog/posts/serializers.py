@@ -1,5 +1,7 @@
+# DJANGO REST FRAMEWORK IMPORTS
 from rest_framework import serializers
 
+# MODELS
 from .models import Posts
 
 
@@ -38,3 +40,10 @@ class PostsRetrieveModelSerializer(serializers.ModelSerializer):
             'title',
             'content',
         )
+
+
+class PostsDeleteModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Posts
+        fields = ()

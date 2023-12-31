@@ -1,5 +1,7 @@
+# DJANGO IMPORTS
 from django.db import models
 
+# MODELS
 from base.models import BaseModel
 
 

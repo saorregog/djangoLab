@@ -1,0 +1,962 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Blogging Platform API using Django and DRF",
+    "version": "1.0.0",
+    "description": "Avanzatech Stage 7 lab developed by Sergio Orrego"
+  },
+  "tags": [
+    {
+      "name": "users"
+    },
+    {
+      "name": "posts"
+    },
+    {
+      "name": "likes"
+    },
+    {
+      "name": "comments"
+    }
+  ],
+  "paths": {
+    "/api/users/": {
+      "get": {
+        "operationId": "api_users_list",
+        "summary": "Shows all the users on the blogging platform",
+        "description": "It shows all the users on the blogging platform. Only accessible for SUPERUSER",
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsersModel_ListCreate"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/create/": {
+      "post": {
+        "operationId": "api_users_create",
+        "summary": "Creates a new user on the blogging platform",
+        "description": "It creates a new user on the blogging platform with configurable role and team fields. Only accessible for SUPERUSER",
+        "tags": [
+          "users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersModel_ListCreate"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersModel_ListCreate"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersModel_ListCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful creation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersModel_ListCreate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/update/{userId}/": {
+      "put": {
+        "operationId": "api_users_update",
+        "summary": "Edits the specified user on the blogging platform",
+        "description": "It edits the specified user (path param) on the blogging platform. Only accessible for SUPERUSER",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "ID of user in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersModel_Update_Request"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersModel_Update_Request"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersModel_Update_Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersModel_Update_Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/delete/{userId}/": {
+      "delete": {
+        "operationId": "api_users_delete",
+        "summary": "Deletes the specified user on the blogging platform",
+        "description": "It deletes (soft delete) the specified user (path param) on the blogging platform. Only accessible for SUPERUSER",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "ID of user in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation. No response body"
+          }
+        }
+      }
+    },
+    "/api/posts/": {
+      "get": {
+        "operationId": "api_posts_list",
+        "summary": "Shows all the posts on the blogging platform",
+        "description": "It shows all the posts on the blogging platform, according to the read permission of each post",
+        "tags": [
+          "posts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedPostsModel_List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/{postId}/": {
+      "get": {
+        "operationId": "api_posts_retrieve",
+        "summary": "Shows the specified post on the blogging platform",
+        "description": "It shows the specified post (path param) on the blogging platform, according to the read permission of the post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostsModel_Retrieve"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/create/": {
+      "post": {
+        "operationId": "api_posts_create",
+        "summary": "Creates a new post on the blogging platform",
+        "description": "It creates a new post on the blogging platform with configurable read/edit permissions, but only if the user is authenticated",
+        "tags": [
+          "posts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostsModel_Create"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostsModel_Create"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PostsModel_Create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful creation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostsModel_Create"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/update/{postId}/": {
+      "put": {
+        "operationId": "api_posts_update",
+        "summary": "Edits the specified post on the blogging platform",
+        "description": "It edits the specified post (path param) on the blogging platform, but only if the user is authenticated and according to the edit permission of the post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostsModel_Update_Request"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostsModel_Update_Request"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PostsModel_Update_Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostsModel_Update_Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/delete/{postId}/": {
+      "delete": {
+        "operationId": "api_posts_delete",
+        "summary": "Deletes the specified post on the blogging platform",
+        "description": "It deletes (soft delete) the specified post (path param) on the blogging platform, but only if the user is authenticated and according to the edit permission of the post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation. No response body"
+          }
+        }
+      }
+    },
+    "/api/posts/list_likes/{postId}/": {
+      "get": {
+        "operationId": "api_posts_list_likes",
+        "summary": "Shows all the likes linked to the specified post on the blogging platform",
+        "description": "It shows all the likes linked to the specified post (path param) on the blogging platform, according to the read permission of each post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "likes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedLikesModel_List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/like/{postId}/": {
+      "post": {
+        "operationId": "api_posts_like",
+        "summary": "Creates/deletes a like linked to the specified post on the blogging platform",
+        "description": "It creates/deletes (soft delete) a like linked to the specified post (path param) on the blogging platform, but only if the user is authenticated and according to the read permission of the post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "likes"
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful operation. No response body"
+          }
+        }
+      }
+    },
+    "/api/posts/list_comments/{postId}/": {
+      "get": {
+        "operationId": "api_posts_list_comments",
+        "summary": "Shows all the comments linked to the specified post on the blogging platform",
+        "description": "It shows all the comments linked to the specified post (path param) on the blogging platform, according to the read permission of each post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "comments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCommentsModel_List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/comment/{postId}/": {
+      "post": {
+        "operationId": "api_posts_comment_create",
+        "summary": "Creates a comment linked to the specified post on the blogging platform",
+        "description": "It creates a comment linked to the specified post (path param) on the blogging platform, but only if the user is authenticated and according to the read permission of the post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "comments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentsModel_Create"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentsModel_Create"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentsModel_Create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful creation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentsModel_Create"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/comment/delete/{postId}/": {
+      "delete": {
+        "operationId": "api_posts_comment_delete_destroy",
+        "summary": "Deletes the specified comment linked to the specified post on the blogging platform",
+        "description": "It deletes (soft delete) the specified comment (query param) linked to the specified post (path param) on the blogging platform; but only if the user is authenticated and the comment's owner (in case the user is a blogger), and according to the read permission of the post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "description": "ID of post in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "comment_id",
+            "description": "ID of comment in the database",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "comments"
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation. No response body"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RoleEnum_AdminFirst": {
+        "enum": [
+          "admin",
+          "blogger"
+        ],
+        "type": "string",
+        "description": "* `admin` - Admin\n* `blogger` - Blogger"
+      },
+      "RoleEnum_BloggerFirst": {
+        "enum": [
+          "blogger",
+          "admin"
+        ],
+        "type": "string",
+        "description": "* `blogger` - Blogger\n* `admin` - Admin"
+      },
+      "UsersModel_ListCreate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "example": "superadmin@example.com"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "writeOnly": true,
+            "example": 123
+          },
+          "first_name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 30,
+            "example": "Super Admin"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleEnum_AdminFirst"
+          },
+          "team": {
+            "type": "string",
+            "maxLength": 30,
+            "example": ""
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "UsersModel_Update_Request": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": ""
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "example": ""
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "writeOnly": true,
+            "example": ""
+          },
+          "first_name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 30,
+            "example": ""
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleEnum_BloggerFirst"
+          },
+          "team": {
+            "type": "string",
+            "maxLength": 30,
+            "example": "team 1"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": ""
+          }
+        }
+      },
+      "UsersModel_Update_Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "example": "superadmin@example.com"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "writeOnly": true,
+            "example": 123
+          },
+          "first_name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 30,
+            "example": "Super Admin"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleEnum_BloggerFirst"
+          },
+          "team": {
+            "type": "string",
+            "maxLength": 30,
+            "example": "team 1"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ReadPermissionEnum_OwnerFirst": {
+        "enum": [
+          "owner",
+          "team",
+          "authenticated",
+          "public"
+        ],
+        "type": "string",
+        "description": "* `owner` - Owner\n* `team` - Team\n* `authenticated` - Authenticated\n* `public` - Public"
+      },
+      "EditPermissionEnum_OwnerFirst": {
+        "enum": [
+          "owner",
+          "team",
+          "authenticated",
+          "public"
+        ],
+        "type": "string",
+        "description": "* `owner` - Owner\n* `team` - Team\n* `authenticated` - Authenticated\n* `public` - Public"
+      },
+      "ReadPermissionEnum_PublicFirst": {
+        "enum": [
+          "public",
+          "owner",
+          "team",
+          "authenticated"
+        ],
+        "type": "string",
+        "description": "* `public` - Public\n* `owner` - Owner\n* `team` - Team\n* `authenticated` - Authenticated"
+      },
+      "EditPermissionEnum_PublicFirst": {
+        "enum": [
+          "public",
+          "owner",
+          "team",
+          "authenticated"
+        ],
+        "type": "string",
+        "description": "* `public` - Public\n* `owner` - Owner\n* `team` - Team\n* `authenticated` - Authenticated"
+      },
+      "PostsModel_List": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "author": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Post 1"
+          },
+          "content": {
+            "type": "string",
+            "example": "Lorem Ipsum"
+          },
+          "read_permission": {
+            "$ref": "#/components/schemas/ReadPermissionEnum_OwnerFirst"
+          },
+          "edit_permission": {
+            "$ref": "#/components/schemas/EditPermissionEnum_OwnerFirst"
+          }
+        }
+      },
+      "PaginatedPostsModel_List": {
+        "type": "object",
+        "properties": {
+          "current_page": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_pages": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_count": {
+            "type": "integer",
+            "example": 1
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": null
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": null
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostsModel_List"
+            }
+          }
+        }
+      },
+      "PostsModel_Retrieve": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Post 1"
+          },
+          "content": {
+            "type": "string",
+            "example": "Lorem Ipsum"
+          }
+        }
+      },
+      "PostsModel_Create": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Post 1"
+          },
+          "content": {
+            "type": "string",
+            "example": "Lorem Ipsum"
+          },
+          "read_permission": {
+            "$ref": "#/components/schemas/ReadPermissionEnum_OwnerFirst"
+          },
+          "edit_permission": {
+            "$ref": "#/components/schemas/EditPermissionEnum_OwnerFirst"
+          }
+        }
+      },
+      "PostsModel_Update_Request": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "example": ""
+          },
+          "content": {
+            "type": "string",
+            "example": "Updated content"
+          },
+          "read_permission": {
+            "$ref": "#/components/schemas/ReadPermissionEnum_PublicFirst"
+          },
+          "edit_permission": {
+            "example": ""
+          }
+        }
+      },
+      "PostsModel_Update_Response": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Post 1"
+          },
+          "content": {
+            "type": "string",
+            "example": "Updated content"
+          },
+          "read_permission": {
+            "$ref": "#/components/schemas/ReadPermissionEnum_PublicFirst"
+          },
+          "edit_permission": {
+            "$ref": "#/components/schemas/EditPermissionEnum_OwnerFirst"
+          }
+        }
+      },
+      "LikesModel_List": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "user": {
+            "type": "integer",
+            "example": 1
+          },
+          "post": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "PaginatedLikesModel_List": {
+        "type": "object",
+        "properties": {
+          "current_page": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_pages": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_count": {
+            "type": "integer",
+            "example": 1
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": null
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": null
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LikesModel_List"
+            }
+          }
+        }
+      },
+      "CommentsModel_List": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "user": {
+            "type": "integer",
+            "example": 1
+          },
+          "post": {
+            "type": "integer",
+            "example": 1
+          },
+          "content": {
+            "type": "string",
+            "example": "This is a comment"
+          }
+        }
+      },
+      "PaginatedCommentsModel_List": {
+        "type": "object",
+        "properties": {
+          "current_page": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_pages": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_count": {
+            "type": "integer",
+            "example": 1
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": null
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": null
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentsModel_List"
+            }
+          }
+        }
+      },
+      "CommentsModel_Create": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "This is a comment"
+          }
+        }
+      }
+    }
+  }
+}

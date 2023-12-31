@@ -1,5 +1,7 @@
+# DJANGO REST FRAMEWORK IMPORTS
 from rest_framework import serializers
 
+# MODELS
 from .models import CustomUsers
 
 
@@ -16,3 +18,4 @@ class UsersModelSerializer(serializers.ModelSerializer):
             'team',
             'is_active'
         )
+        extra_kwargs = {'password': {'write_only': True}}

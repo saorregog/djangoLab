@@ -167,8 +167,14 @@ class PostsListCommentsAPIView(BasePostsQuerySet, generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         post = self.get_object()
 
-        comments = Comments.objects.filter(Q(post=post) & Q(is_active=True))
-
+        if hasattr(request.user, 'role'):
+            if request.user.role == 'admin':
+                comments = Comments.objects.filter(post=post)
+            else:
+                comments = Comments.objects.filter(Q(post=post) & Q(is_active=True))
+        else:
+            comments = Comments.objects.filter(Q(post=post) & Q(is_active=True))
+        
         page = self.paginate_queryset(comments)
         
         if page is not None:

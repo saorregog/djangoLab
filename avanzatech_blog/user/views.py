@@ -53,12 +53,15 @@ class UsersCreateAPIView(generics.CreateAPIView):
 
         if not password:
             error['errors'].append('Password field may not be blank.')
+        
+        if not first_name:
+            first_name = None
+        
+        if not role:
+            role = 'blogger'
 
         if role == 'blogger' and not team:
             error['errors'].append('Bloggers must belong to one team.')
-
-        if not first_name:
-            first_name = None
 
         if error['errors']:
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
@@ -66,7 +69,7 @@ class UsersCreateAPIView(generics.CreateAPIView):
         email = BaseUserManager.normalize_email(email)
         password = make_password(password)
 
-        serializer.save(is_active=is_active, email=email, password=password, first_name=first_name)
+        serializer.save(is_active=is_active, first_name=first_name, role=role)
 
         headers = self.get_success_headers(serializer.data)
 
@@ -112,12 +115,16 @@ class UsersUpdateAPIView(generics.UpdateAPIView):
             password = make_password(password)
         else:
             password = serializer.instance.password
-
-        if role == instance_role and not team:
-            team = serializer.instance.team
-
-        if role == 'blogger' and not team:
+        
+        if instance_role == 'admin' and role == 'blogger' and not team:
             error['errors'].append('Bloggers must belong to one team.')
+        elif instance_role == 'blogger' and role == 'admin' and not team:
+            team = ''
+        elif not role and not team:
+            role = instance_role
+            team = serializer.instance.team
+        elif not team:
+            team = serializer.instance.team
         
         if not first_name:
             first_name = serializer.instance.first_name

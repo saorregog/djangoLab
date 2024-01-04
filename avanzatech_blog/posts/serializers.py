@@ -19,6 +19,17 @@ class PostsListModelSerializer(serializers.ModelSerializer):
         )
 
 
+class PostsRetrieveModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Posts
+        fields = (
+            'author',
+            'title',
+            'content'
+        )
+
+
 class PostsCreateUpdateModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -28,17 +39,6 @@ class PostsCreateUpdateModelSerializer(serializers.ModelSerializer):
             'content',
             'read_permission',
             'edit_permission'
-        )
-
-
-class PostsRetrieveModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Posts
-        fields = (
-            'author',
-            'title',
-            'content',
         )
 
 

@@ -15,10 +15,10 @@ class BasePostsQuerySet():
 
             if self.request.method == 'GET' or self.request.method == 'POST':
                 # Check read permissions
-                return Posts.objects.filter((Q(read_permission='public') | Q(read_permission='authenticated') | Q(author=user) | Q(author__team=user.team)) & Q(is_active=True))
+                return Posts.objects.filter((Q(read_permission='public') | Q(read_permission='authenticated') | (Q(read_permission='team') & Q(author__team=user.team)) | (Q(read_permission='owner') & Q(author=user))) & Q(is_active=True))
 
             if self.request.method == 'PUT' or self.request.method == 'PATCH' or self.request.method == 'DELETE':
                 # Check edit permissions
-                return Posts.objects.filter((Q(edit_permission='public') | Q(edit_permission='authenticated') | Q(author=user) | Q(author__team=user.team)) & Q(is_active=True))
+                return Posts.objects.filter((Q(edit_permission='public') | Q(edit_permission='authenticated') | (Q(edit_permission='team') & Q(author__team=user.team)) | (Q(edit_permission='owner') & Q(author=user))) & Q(is_active=True))
         else:
             return Posts.objects.filter(Q(read_permission='public') & Q(is_active=True))

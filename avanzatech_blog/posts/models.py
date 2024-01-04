@@ -14,7 +14,7 @@ class Posts(BaseModel):
     ]
 
     author = models.ForeignKey('user.CustomUsers', blank=True, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=100, unique=True, blank=True)
     content = models.TextField(blank=True)
     read_permission = models.CharField(max_length=13, choices=PERMISSIONS, default='owner')
     edit_permission = models.CharField(max_length=13, choices=PERMISSIONS, default='owner')

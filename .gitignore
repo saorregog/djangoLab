@@ -6,3 +6,4 @@ db.sqlite3
 Pipfile
 venv/
 user_pass.txt
+.pytest_cache/

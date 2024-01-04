@@ -478,4 +478,109 @@ class PostsComment(APITestCase):
         response = self.client.post(reverse('posts-comment', kwargs={'pk': 2}), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['detail'], 'Not found.')
+
+
+class PostsDeleteComment(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.endpoint = reverse('posts-delete_comment', kwargs={'pk': 1}) + '?comment_id=1'
+        self.user = factories.CustomUsersFactory()
     
+    def test_1_access_to_browsable_api_by_authenticated_admins(self):
+        self.user.role = 'admin'
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.endpoint)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.data['detail'], 'Method \"GET\" not allowed.')
+    
+    def test_2_access_to_browsable_api_by_authenticated_bloggers(self):
+        self.user.role = 'blogger'
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.endpoint)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.data['detail'], 'Method \"GET\" not allowed.')
+    
+    def test_3_access_to_browsable_api_by_unauthenticated_users(self):
+        response = self.client.get(self.endpoint)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['detail'], 'Authentication credentials were not provided.')
+    
+    def test_4_delete_comments_in_all_posts_visible_for_authenticated_admin_if_posts_and_comments_were_created_by_blogger(self):
+        self.user.role = 'admin'
+        self.client.force_authenticate(user=self.user)
+
+        factories.CustomUsersFactory(email='test_2@example.com').save()
+
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 1', read_permission='owner').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 2', read_permission='team').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 3', read_permission='authenticated').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 4', read_permission='public').save()
+
+        for i in range (1, 5):
+            factories.CommentsFactory(user=CustomUsers.objects.get(pk=1), post=Posts.objects.get(pk=i)).save()
+
+            response = self.client.delete(reverse('posts-delete_comment', kwargs={'pk': i}) + f'?comment_id={i}')
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            self.assertEqual(response.data, None)
+            self.assertFalse(Comments.objects.get(post__id=i).is_active)
+    
+    def test_5_delete_comments_in_all_posts_visible_for_authenticated_blogger_if_posts_and_comments_were_created_by_blogger_from_same_team(self):
+        self.user.role = 'blogger'
+        self.user.team = 'team 1'
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+
+        factories.CustomUsersFactory(email='test_2@example.com', team='team 1').save()
+
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 1', read_permission='owner').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 2', read_permission='team').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 3', read_permission='authenticated').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 4', read_permission='public').save()
+
+        for i in range (1, 5):
+            factories.CommentsFactory(user=CustomUsers.objects.get(pk=2), post=Posts.objects.get(pk=i)).save()
+
+            response = self.client.delete(reverse('posts-delete_comment', kwargs={'pk': i}) + f'?comment_id={i}')
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+            self.assertEqual(response.data['detail'], 'Not found.')
+            self.assertTrue(Comments.objects.get(post__id=i).is_active)
+    
+    def test_6_delete_comments_in_all_posts_visible_for_authenticated_blogger_if_posts_and_comments_were_created_by_blogger_from_different_team(self):
+        self.user.role = 'blogger'
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+
+        factories.CustomUsersFactory(email='test_2@example.com', team='team 2').save()
+
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 1', read_permission='owner').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 2', read_permission='team').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 3', read_permission='authenticated').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=2), title='Post 4', read_permission='public').save()
+
+        for i in range (1, 5):
+            factories.CommentsFactory(user=CustomUsers.objects.get(pk=2), post=Posts.objects.get(pk=i)).save()
+
+            response = self.client.delete(reverse('posts-delete_comment', kwargs={'pk': i}) + f'?comment_id={i}')
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+            self.assertEqual(response.data['detail'], 'Not found.')
+            self.assertTrue(Comments.objects.get(post__id=i).is_active)
+    
+    def test_7_delete_comments_in_all_posts_visible_for_authenticated_blogger_if_posts_and_comments_were_created_by_him_or_herself(self):
+        self.user.role = 'blogger'
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+
+        factories.CustomUsersFactory(email='test_2@example.com', team='team 2').save()
+
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 1', read_permission='owner').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 2', read_permission='team').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 3', read_permission='authenticated').save()
+        factories.PostsFactory(author=CustomUsers.objects.get(pk=1), title='Post 4', read_permission='public').save()
+
+        for i in range (1, 5):
+            factories.CommentsFactory(user=CustomUsers.objects.get(pk=1), post=Posts.objects.get(pk=i)).save()
+
+            response = self.client.delete(reverse('posts-delete_comment', kwargs={'pk': i}) + f'?comment_id={i}')
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            self.assertEqual(response.data, None)
+            self.assertFalse(Comments.objects.get(post__id=i).is_active)

@@ -237,7 +237,7 @@ class PostsDeleteCommentAPIView(BasePostsQuerySet, generics.DestroyAPIView):
             comment = get_object_or_404(Comments, Q(pk=comment_pk) & Q(post=post))
         
         if request.user.role == 'blogger':
-            comment = get_object_or_404(Comments, Q(pk=comment_pk) & Q(user=request.user) & Q(post=post))
+            comment = get_object_or_404(Comments, Q(pk=comment_pk) & Q(user=request.user) & Q(post=post) & Q(is_active=True))
 
         comment.is_active = False
         comment.save()
